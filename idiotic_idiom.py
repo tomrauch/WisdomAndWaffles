@@ -1,4 +1,5 @@
 import random
+import streamlit as st
 
 def generate_idiom():
     subjects = [
@@ -19,13 +20,32 @@ def generate_idiom():
     ]
     endings = [
         "on Thursdays", "without warning", "if nobody watches", "in traffic", "during tax season",
-        "while humming loudly", "before lunch", "after midnight", "on roller skates", "inside a dream", "is a game well played"
+        "while humming loudly", "before lunch", "after midnight", "on roller skates", "inside a dream",
+        "is a game well played"
     ]
 
-    return f"A {random.choice(adjectives)} {random.choice(subjects)} {random.choice(verbs)} {random.choice(objects)} {random.choice(endings)}."
+    return f"{random.choice(subjects)} {random.choice(verbs)} {random.choice(adjectives)} {random.choice(objects)} {random.choice(endings)}."
 
-# Allow quick testing standalone
+def render_idiom_badge(st):
+    if "last_idiom" not in st.session_state:
+        st.session_state.last_idiom = ""
+
+    if st.button("🎲 Generate Idiotic Idiom"):
+        new_idiom = generate_idiom()
+
+        # Ensure no immediate repetition
+        while new_idiom == st.session_state.last_idiom:
+            new_idiom = generate_idiom()
+
+        st.session_state.last_idiom = new_idiom
+        st.success(f"💡 Idiotic Idiom: {new_idiom}")
+
+# Quick standalone test
 if __name__ == "__main__":
+    last = ""
     for _ in range(5):
-        print("💡 Idiotic Idiom:", generate_idiom())
-
+        idiom = generate_idiom()
+        while idiom == last:
+            idiom = generate_idiom()
+        last = idiom
+        print("💡 Idiotic Idiom:", idiom)
