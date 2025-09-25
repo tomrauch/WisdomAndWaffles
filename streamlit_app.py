@@ -1,25 +1,20 @@
-import os
 import streamlit as st
 from openai import OpenAI
-from dotenv import load_dotenv
+import os
 import json
 import PyPDF2
-import idiotic_idiom  # separate file in same folder
 
-# Load environment variables locally (.env), safe to keep for Streamlit Cloud too
-load_dotenv()
-
-# Set up OpenAI client
+# Initialize OpenAI client
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# Load perspectives from JSON
+# Load perspectives
 with open("data/perspectives.json", "r") as f:
     perspectives = json.load(f)
 
 # ---------------------------
-# App Title + Disclaimer
+# App Title & Disclaimer
 # ---------------------------
-st.title("🧭 Ideology Chatbot")
+st.title("Ideology Chatbot")
 st.write("Compare how different ideologies analyze history, economics, and policy.")
 
 st.info("⚠️ Disclaimer: This app does not log or save your inputs. "
@@ -27,103 +22,95 @@ st.info("⚠️ Disclaimer: This app does not log or save your inputs. "
         "Responses are AI-generated and for educational purposes only.")
 
 # ---------------------------
-# Upload File Card
+# File Upload Card
 # ---------------------------
 with st.container():
     st.markdown("### 📂 Upload a File for Analysis (Optional)")
     uploaded_file = st.file_uploader("Upload PDF", type=["pdf"])
+    uploaded_text = ""
 
-    file_text = ""
-    if uploaded_file:
-        pdf_reader = PyPDF2.PdfReader(uploaded_file)
-        file_text = "\n".join([page.extract_text() for page in pdf_reader.pages if page.extract_text()])
-        st.markdown("#### 📑 Extracted PDF Content")
-        st.text(file_text[:1000] + "..." if len(file_text) > 1000 else file_text)
+    if uploaded_file is not None:
+        try:
+            pdf_reader = PyPDF2.PdfReader(uploaded_file)
+            uploaded_text = " ".join([page.extract_text() or "" for page in pdf_reader.pages])
+            st.success("✅ PDF uploaded and text extracted successfully!")
+            st.markdown("#### Extracted PDF Content")
+            st.write(uploaded_text[:1000] + ("..." if len(uploaded_text) > 1000 else ""))
+        except Exception as e:
+            st.error(f"Error reading PDF: {e}")
 
 # ---------------------------
-# Question + Perspectives (Form)
+# Question & Perspectives Card
 # ---------------------------
 with st.container():
     st.markdown("### ❓ Ask a Question")
-    with st.form("ideology_form"):
-        user_question = st.text_input("Type your question about history, economics, or the workforce:")
 
-        selected_perspectives = st.multiselect(
-            "Choose perspectives (max 3 will be analyzed)",
-            list(perspectives.keys())
+    with st.form("question_form"):
+        user_question = st.text_input(
+            "Type your question about history, economics, or the workforce:",
+            key="user_question",
+            label_visibility="visible"
         )
 
-        submitted = st.form_submit_button("Submit")
+        selected_perspectives = st.multiselect(
+            "Choose up to 3 perspectives",
+            options=list(perspectives.keys()),
+            max_selections=3,
+        )
 
-    # Enforce a soft max of 3
-    if len(selected_perspectives) > 3:
-        st.warning("⚠️ You selected more than 3. Only the first 3 will be analyzed.")
-        selected_perspectives = selected_perspectives[:3]
+        submit_button = st.form_submit_button("🔍 Submit Question")
 
 # ---------------------------
-# Response Generation with Status Overlay
+# Handle Submit
 # ---------------------------
-if submitted and user_question and selected_perspectives:
-    responses = {}
+if submit_button and user_question and selected_perspectives:
+    results = {}
 
-    with st.status("Processing your request...", expanded=True) as status:
-        # Step 1: Perspectives
-        st.write("🔄 Generating perspectives...")
-        for p in selected_perspectives:
-            context = f"\n\nRelevant document text:\n{file_text}" if file_text else ""
-            prompt = (
-                f"You are a chatbot with the following perspective:\n{perspectives[p]}\n\n"
-                f"Answer this question:\n{user_question}{context}"
-            )
+    with st.spinner("⚙️ Generating perspectives..."):
+        for perspective in selected_perspectives:
+            prompt = f"""
+            You are a chatbot with the following perspective: {perspectives[perspective]}.
+            Question: {user_question}
+            Uploaded text (if relevant): {uploaded_text[:1000]}
+            Provide a thoughtful answer from this perspective.
+            """
+
             response = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4o-mini",
                 messages=[{"role": "system", "content": prompt}],
                 temperature=0.7
             )
-            try:
-                responses[p] = response.choices[0].message["content"]
-            except:
-                responses[p] = response.choices[0].message.content
+            results[perspective] = response.choices[0].message.content
 
-        # Step 2: Summary
-        summary_text = ""
-        if len(responses) > 1:
-            st.write("🔄 Generating summary of similarities and differences...")
-            summary_prompt = (
-                "Compare the following ideological responses. "
-                "Highlight major similarities and differences:\n\n"
-                + "\n\n".join([f"{p}: {r}" for p, r in responses.items()])
-            )
-            summary_response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[{"role": "system", "content": summary_prompt}],
-                temperature=0.5
-            )
-            try:
-                summary_text = summary_response.choices[0].message["content"]
-            except:
-                summary_text = summary_response.choices[0].message.content
-
-        status.update(label="✅ Completed", state="complete", expanded=False)
-
-    # Display responses
-    st.markdown("### 📝 Responses")
-    cols = st.columns(len(responses))
-    for i, (p, r) in enumerate(responses.items()):
-        with cols[i]:
-            st.subheader(p)
-            st.write(r)
-
-    # Display summary in its own card
-    if summary_text:
+    # Display each perspective in its own card
+    for perspective, answer in results.items():
         with st.container():
-            st.markdown("### 🔍 Summary of Similarities and Differences")
-            st.write(summary_text)
+            st.markdown(f"#### {perspective}")
+            st.write(answer)
+
+    # Generate summary
+    with st.spinner("📝 Generating summary of similarities and differences..."):
+        combined_text = "\n\n".join([f"{k}: {v}" for k, v in results.items()])
+        summary_prompt = f"""
+        Compare the following ideological perspectives' answers.
+        Summarize the most important similarities and differences clearly.
+
+        {combined_text}
+        """
+
+        summary_response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "system", "content": summary_prompt}],
+            temperature=0.5
+        )
+
+        with st.container():
+            st.markdown("### 🔎 Summary of Similarities and Differences")
+            st.write(summary_response.choices[0].message.content)
 
 # ---------------------------
-# Idiotic Idiom Generator
+# Idiotic Idiom Badge
 # ---------------------------
-with st.container():
-    st.markdown("### 🎲 Just for Fun")
-    if st.button("Generate Idiotic Idiom"):
-        st.success(f"💡 Idiotic Idiom: {idiotic_idiom.generate_idiom()}")
+import idiotic_idiom
+idiotic_idiom.render_idiom_badge(st)
+
