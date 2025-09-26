@@ -96,7 +96,6 @@ selected_perspectives = st.multiselect(
 # Submit Button
 # ---------------------------
 if st.button("🚀 Submit") and user_question and selected_perspectives:
-    # Progress overlay
     with st.spinner("Generating perspectives..."):
         responses = {}
         for p in selected_perspectives:
@@ -112,15 +111,10 @@ if st.button("🚀 Submit") and user_question and selected_perspectives:
             )
             responses[p] = response.choices[0].message.content
 
-    # Display results side by side
-    cols = st.columns(len(responses))
-    for idx, (p, r) in enumerate(responses.items()):
-        with cols[idx]:
-            st.markdown(f"### {p}")
-            st.write(r)
+        # Save responses in session state
+        st.session_state.responses = responses
 
-    # Generate summary of similarities/differences
-    with st.spinner("Summarizing similarities and differences..."):
+        # Generate summary and save
         summary_prompt = (
             "Compare and summarize the key similarities and differences "
             "across the following perspectives:\n\n"
@@ -131,12 +125,22 @@ if st.button("🚀 Submit") and user_question and selected_perspectives:
             messages=[{"role": "system", "content": summary_prompt}],
             temperature=0.7,
         )
-        summary_text = summary_response.choices[0].message.content
+        st.session_state.summary = summary_response.choices[0].message.content
 
-    # Display summary in its own card
+# ---------------------------
+# Display stored results (persist across reruns)
+# ---------------------------
+if "responses" in st.session_state:
+    cols = st.columns(len(st.session_state.responses))
+    for idx, (p, r) in enumerate(st.session_state.responses.items()):
+        with cols[idx]:
+            st.markdown(f"### {p}")
+            st.write(r)
+
+if "summary" in st.session_state:
     st.markdown("---")
     st.subheader("🔍 Summary of Similarities and Differences")
-    st.info(summary_text)
+    st.info(st.session_state.summary)
 
 # ---------------------------
 # Idiotic Idiom Badge (external file)
