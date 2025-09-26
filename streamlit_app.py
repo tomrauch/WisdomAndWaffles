@@ -44,8 +44,8 @@ st.markdown(
     <div style='text-align: center; padding: 20px;'>
         <h1 style='margin-bottom: 0;'>🥞 Wisdom & Waffles ☕</h1>
         <p style='font-size: 18px; color: #555;'>
-            A diner for ideas — where perspectives from across the spectrum 
-            come together to spark understanding, civil debate, and find common ground across the ideological spectrum.
+            A diner for ideas — where perspectives from across the political spectrum 
+            come together to spark understanding, civil debate, and find common ground.
         </p>
     </div>
     """,
