@@ -16,7 +16,7 @@ st.markdown(
     """
     <div style='background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 1px solid #ffeeba;'>
         ⚠️ <b>Disclaimer:</b> This app is for educational and exploratory purposes only. 
-        It simulates ideological perspectives using AI and does not represent factual truth or endorsement.  
+        It simulates ideological perspectives using AI. 
         Use responsibly to encourage understanding and civil debate.
     </div>
     """,
@@ -45,7 +45,7 @@ st.markdown(
         <h1 style='margin-bottom: 0;'>🥞 Wisdom & Waffles ☕</h1>
         <p style='font-size: 18px; color: #555;'>
             A diner for ideas — where perspectives from across the spectrum 
-            come together to spark understanding, civil debate, and common ground.
+            come together to spark understanding, civil debate, and find common ground across the ideological spectrum.
         </p>
     </div>
     """,
