@@ -1,173 +1,147 @@
+import streamlit as st
 import os
 import json
-import streamlit as st
+import random
 from openai import OpenAI
-import PyPDF2
-import idiotic_idiom
+from PyPDF2 import PdfReader
 
-# Load perspectives from JSON
-with open("data/perspectives.json", "r") as f:
-    perspectives = json.load(f)
-
-# Initialize OpenAI client
+# ---------------------------
+# Load API Key
+# ---------------------------
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ---------------------------
-# Retro Diner Theme Styling
+# Load Perspectives
 # ---------------------------
-st.markdown(
-    """
-    <style>
-    .stApp {
-        background-color: #fdf3e7;
-        background-image: url('https://www.transparenttextures.com/patterns/cream-pixels.png');
-    }
-    h2, h3 {
-        font-family: 'Courier New', monospace;
-        color: #5a2d0c;
-    }
-    .stCard {
-        background-color: #fff9f4;
-        border: 2px solid #8B0000;
-        border-radius: 12px;
-        padding: 20px;
-        margin: 15px 0;
-        box-shadow: 4px 4px 8px rgba(0,0,0,0.15);
-    }
-    .stButton > button {
-        background-color: #ffcc00;
-        color: black;
-        border-radius: 12px;
-        font-weight: bold;
-        padding: 10px 20px;
-        border: 2px solid #8B0000;
-    }
-    .stButton > button:hover {
-        background-color: #ffa500;
-        color: white;
-    }
-    .stAlert {
-        background-color: #fff3cd;
-        border: 2px dashed #856404;
-        border-radius: 10px;
-        font-family: 'Courier New', monospace;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+with open("data/perspectives.json", "r") as f:
+    perspectives = json.load(f)
 
 # ---------------------------
-# Banner & Mission Statement
+# Banner Section
 # ---------------------------
+banner_path = os.path.join("assets", "waffle_banner.png")
+
+st.image(banner_path, use_container_width=True, caption="Wisdom & Waffles Banner")
+
 st.markdown(
     """
-    <div style="text-align: center; margin-bottom: 20px;">
-        <img src="assets/waffle_banner.png" style="width: 100%; max-height: 250px; object-fit: cover; border-bottom: 4px double #8B0000;" alt="Wisdom & Waffles Banner">
-    </div>
-    <div style="text-align: center; font-family: Georgia, serif; font-size: 18px; color: #5a2d0c; margin: 15px 0 25px 0;">
-        Welcome to <b>Wisdom & Waffles</b> 🧇☕ <br><br>
-        A diner where ideas are served hot, and everyone has a seat at the table.  
-        Here, people from across the political and ideological spectrum come together  
-        to share perspectives, foster civil debate, and seek common ground  
+    <h2 style="text-align: center; color: #4B2E2E;">
+        Welcome to <b>Wisdom & Waffles</b> 🧇 ☕
+    </h2>
+    <p style="text-align: center; font-size: 18px; color: #5C4033;">
+        A cozy diner-inspired space where people from across the political spectrum
+        can share their views, find common ground, and foster civil debate
         for the benefit of all.
+    </p>
+    """,
+    unsafe_allow_html=True
+)
+
+# ---------------------------
+# Disclaimer Banner
+# ---------------------------
+st.markdown(
+    """
+    <div style="background-color:#f9f9f9; padding:10px; border-radius:8px; border-left: 5px solid #FFCC00;">
+        ⚠️ <b>Disclaimer:</b> This app does not log or save your inputs.
+        Do not upload personal, sensitive, or confidential documents. 
+        Responses are AI-generated and for educational purposes only.
     </div>
     """,
     unsafe_allow_html=True
 )
 
 # ---------------------------
-# Disclaimer
-# ---------------------------
-st.info(
-    "⚠️ Disclaimer: This app does not log or save your inputs. "
-    "Do not upload personal, sensitive, or confidential documents. "
-    "Responses are AI-generated and for educational purposes only."
-)
-
-# ---------------------------
-# File Upload
+# File Upload Card
 # ---------------------------
 with st.container():
     st.subheader("📂 Upload a File for Analysis (Optional)")
     uploaded_file = st.file_uploader("Upload PDF", type=["pdf"])
-
-    extracted_text = ""
+    pdf_text = ""
     if uploaded_file is not None:
-        pdf_reader = PyPDF2.PdfReader(uploaded_file)
-        extracted_text = " ".join([page.extract_text() or "" for page in pdf_reader.pages])
-        st.markdown("#### 📑 Extracted PDF Content")
-        st.write(extracted_text[:1000] + ("..." if len(extracted_text) > 1000 else ""))
+        reader = PdfReader(uploaded_file)
+        for page in reader.pages:
+            pdf_text += page.extract_text() or ""
+        st.markdown("### 📄 Extracted PDF Content")
+        st.write(pdf_text[:1000] + ("..." if len(pdf_text) > 1000 else ""))
 
 # ---------------------------
-# Ask a Question + Perspectives
+# Question + Perspective Card
 # ---------------------------
-with st.form("ideology_form"):
-    st.subheader("❓ Ask a Question")
-    user_question = st.text_area(
-        "Type your question about history, economics, or the workforce:",
-        placeholder="What is the importance of the second amendment of the constitution?",
-        height=60
-    )
+st.subheader("❓ Ask a Question")
 
-    st.subheader("👓 Choose Perspectives")
-    perspectives_selected = st.multiselect(
-        "Choose perspectives (max 3)",
-        list(perspectives.keys())
-    )
+user_question = st.text_area(
+    "Type your question about history, economics, or the workforce:",
+    placeholder="What is the importance of the second amendment of the constitution?",
+)
 
-    if len(perspectives_selected) > 3:
-        st.warning("🚦 Please limit your selection to 3 perspectives. Only the first 3 will be used.")
-        perspectives_selected = perspectives_selected[:3]
+selected_perspectives = st.multiselect(
+    "Choose up to 3 perspectives",
+    list(perspectives.keys()),
+    max_selections=3,
+)
 
-    submitted = st.form_submit_button("🍳 Place Your Order")
+# Submit button
+submit = st.button("Submit Question")
 
 # ---------------------------
 # Generate Responses
 # ---------------------------
-if submitted and user_question and perspectives_selected:
-    with st.spinner("🍳 Cooking up your perspectives... please wait!"):
-        progress_container = st.empty()
-        progress_bar = st.progress(0)
-
+if submit and user_question and selected_perspectives:
+    # Show locked overlay with progress
+    with st.spinner("Generating perspectives..."):
         responses = {}
-        for i, p in enumerate(perspectives_selected, start=1):
-            progress_container.markdown(f"👓 Generating **{p}** perspective...")
-            prompt = f"You are a chatbot with the following perspective:\n{perspectives[p]}\n\nAnswer this question:\n{user_question}\n\nAdditional context:\n{extracted_text}"
-            response = client.chat.completions.create(
+        for perspective in selected_perspectives:
+            prompt = f"You are a chatbot with the following perspective:\n{perspectives[perspective]}\n\nAnswer this question:\n{user_question}\n\nContext (if any): {pdf_text}"
+            resp = client.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "system", "content": prompt}],
-                temperature=0.7
+                temperature=0.7,
             )
-            responses[p] = response.choices[0].message.content
-            progress_bar.progress(int((i / len(perspectives_selected)) * 100))
+            responses[perspective] = resp.choices[0].message.content
 
-        progress_container.markdown("🍽️ Generating summary of similarities and differences...")
-        summary_prompt = f"Compare the following ideological responses. Summarize the key similarities and differences:\n\n{responses}"
-        summary_response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "system", "content": summary_prompt}],
-            temperature=0.7
-        )
-        summary_text = summary_response.choices[0].message.content
-        progress_bar.progress(100)
-
-    progress_container.empty()
-    progress_bar.empty()
-
-    st.subheader("🍽️ Responses from the Diner Booths")
-    cols = st.columns(len(perspectives_selected))
-    for idx, (p, ans) in enumerate(responses.items()):
+    # Display perspective responses
+    st.markdown("## 🍽️ Perspectives")
+    cols = st.columns(len(selected_perspectives))
+    for idx, perspective in enumerate(selected_perspectives):
         with cols[idx]:
-            st.markdown(f"### {p}")
-            st.write(ans)
+            st.markdown(f"### {perspective}")
+            st.write(responses[perspective])
 
-    st.subheader("👨‍🍳 Chef’s Special: Perspectives Compared")
-    st.info(summary_text)
+    # Generate similarities/differences summary
+    with st.spinner("Generating summary..."):
+        comparison_prompt = f"Compare and summarize the major similarities and differences among these perspectives:\n\n{json.dumps(responses, indent=2)}"
+        summary_resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "system", "content": comparison_prompt}],
+            temperature=0.7,
+        )
+        summary = summary_resp.choices[0].message.content
+
+    st.markdown("## 🔎 Summary of Similarities and Differences")
+    st.write(summary)
 
 # ---------------------------
-# Idiotic Idiom (Fortune Cookie)
+# Idiotic Idiom Generator
 # ---------------------------
-st.markdown("---")
-idiotic_idiom.render_idiom_badge(st)
+def generate_idiom():
+    subjects = [
+        "a frog", "teacher", "no sandwich", "a cloud", "my toothbrush",
+        "a penguin", "this laptop", "my neighbor’s cat", "an elevator", "a cactus"
+    ]
+    verbs = [
+        "jumps over", "complains about", "tickles", "dances with", "argues with",
+        "confuses", "balances on", "runs away from", "interviews", "ignores"
+    ]
+    objects = [
+        "the moon", "a spatula", "quantum foam", "regret", "a lazy river",
+        "traffic cones", "a potato chip", "the stock market", "a shoelace", "jellybeans"
+    ]
+    endings = [
+        "on Thursdays", "without warning", "if nobody watches", "in traffic", "during tax season",
+        "while humming loudly", "before lunch", "after midnight", "on roller skates", "inside a dream"
+    ]
+    return f"{random.choice(subjects)} {random.choice(verbs)} {random.choice(objects)} {random.choice(endings)}."
 
+if st.button("🎲 Generate Idiotic Idiom"):
+    st.success(f"💡 Idiotic Idiom: {generate_idiom()}")
