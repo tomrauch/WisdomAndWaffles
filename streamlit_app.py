@@ -18,13 +18,10 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 st.markdown(
     """
     <style>
-    /* Diner background (tablecloth) */
     .stApp {
         background-color: #fdf3e7;
         background-image: url('https://www.transparenttextures.com/patterns/cream-pixels.png');
     }
-
-    /* Title */
     h1 {
         font-family: 'Georgia', serif;
         font-size: 3em;
@@ -33,14 +30,10 @@ st.markdown(
         border-bottom: 3px double #8B0000;
         padding-bottom: 0.2em;
     }
-
-    /* Subheadings */
     h2, h3 {
         font-family: 'Courier New', monospace;
         color: #5a2d0c;
     }
-
-    /* Cards */
     .stCard {
         background-color: #fff9f4;
         border: 2px solid #8B0000;
@@ -49,8 +42,6 @@ st.markdown(
         margin: 15px 0;
         box-shadow: 4px 4px 8px rgba(0,0,0,0.15);
     }
-
-    /* Buttons */
     .stButton > button {
         background-color: #ffcc00;
         color: black;
@@ -63,8 +54,6 @@ st.markdown(
         background-color: #ffa500;
         color: white;
     }
-
-    /* Disclaimer */
     .stAlert {
         background-color: #fff3cd;
         border: 2px dashed #856404;
@@ -114,10 +103,13 @@ with st.form("ideology_form"):
 
     st.subheader("👓 Choose Perspectives")
     perspectives_selected = st.multiselect(
-        "Choose up to 3 perspectives",
-        list(perspectives.keys()),
-        max_selections=3
+        "Choose perspectives (max 3)",
+        list(perspectives.keys())
     )
+
+    if len(perspectives_selected) > 3:
+        st.warning("🚦 Please limit your selection to 3 perspectives. Only the first 3 will be used.")
+        perspectives_selected = perspectives_selected[:3]
 
     submitted = st.form_submit_button("🍳 Place Your Order")
 
@@ -125,33 +117,39 @@ with st.form("ideology_form"):
 # Generate Responses
 # ---------------------------
 if submitted and user_question and perspectives_selected:
-    responses = {}
-    progress_text = st.empty()
-    progress_bar = st.progress(0)
+    # Block screen with overlay
+    with st.spinner("🍳 Cooking up your perspectives... please wait!"):
+        progress_container = st.empty()
+        progress_bar = st.progress(0)
 
-    for i, p in enumerate(perspectives_selected, start=1):
-        progress_text.text(f"👓 Generating {p} perspective...")
-        prompt = f"You are a chatbot with the following perspective:\n{perspectives[p]}\n\nAnswer this question:\n{user_question}\n\nAdditional context:\n{extracted_text}"
-        response = client.chat.completions.create(
+        responses = {}
+        for i, p in enumerate(perspectives_selected, start=1):
+            progress_container.markdown(f"👓 Generating **{p}** perspective...")
+            prompt = f"You are a chatbot with the following perspective:\n{perspectives[p]}\n\nAnswer this question:\n{user_question}\n\nAdditional context:\n{extracted_text}"
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "system", "content": prompt}],
+                temperature=0.7
+            )
+            responses[p] = response.choices[0].message.content
+            progress_bar.progress(int((i / len(perspectives_selected)) * 100))
+
+        # Summary step
+        progress_container.markdown("🍽️ Generating summary of similarities and differences...")
+        summary_prompt = f"Compare the following ideological responses. Summarize the key similarities and differences:\n\n{responses}"
+        summary_response = client.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[{"role": "system", "content": prompt}],
+            messages=[{"role": "system", "content": summary_prompt}],
             temperature=0.7
         )
-        responses[p] = response.choices[0].message.content
-        progress_bar.progress(int((i / len(perspectives_selected)) * 100))
+        summary_text = summary_response.choices[0].message.content
+        progress_bar.progress(100)
 
-    progress_text.text("🍽️ Generating summary of similarities and differences...")
-    summary_prompt = f"Compare the following ideological responses. Summarize the key similarities and differences:\n\n{responses}"
-    summary_response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "system", "content": summary_prompt}],
-        temperature=0.7
-    )
-    summary_text = summary_response.choices[0].message.content
-    progress_bar.progress(100)
-    progress_text.text("✅ Done!")
+    # Clear overlay after work done
+    progress_container.empty()
+    progress_bar.empty()
 
-    # Display responses
+    # Show results
     st.subheader("🍽️ Responses from the Diner Booths")
     cols = st.columns(len(perspectives_selected))
     for idx, (p, ans) in enumerate(responses.items()):
@@ -159,7 +157,6 @@ if submitted and user_question and perspectives_selected:
             st.markdown(f"### {p}")
             st.write(ans)
 
-    # Summary card
     st.subheader("👨‍🍳 Chef’s Special: Perspectives Compared")
     st.info(summary_text)
 
