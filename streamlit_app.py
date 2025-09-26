@@ -1,4 +1,5 @@
 import os
+import base64
 import streamlit as st
 from openai import OpenAI
 from PyPDF2 import PdfReader
@@ -8,7 +9,6 @@ import idiotic_idiom
 # Setup
 # ---------------------------
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
 st.set_page_config(page_title="Wisdom & Waffles", layout="centered")
 
 # ---------------------------
@@ -27,7 +27,33 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.info("⚠️ Disclaimer: This app does not log or save your inputs. Do not upload personal, sensitive, or confidential documents. Responses are AI-generated and for educational purposes only.")
+# ---------------------------
+# Disclaimer with PDF Button
+# ---------------------------
+pdf_path = "ideology_chatbot_sources.pdf"
+if os.path.exists(pdf_path):
+    with open(pdf_path, "rb") as pdf_file:
+        pdf_bytes = pdf_file.read()
+    b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
+
+    st.markdown(
+        f"""
+        <div style="background-color:#f9f9f9; padding:15px; border-radius:8px; 
+                    border-left: 5px solid #FFCC00; margin-bottom: 1.5rem;">
+            ⚠️ <b>Disclaimer:</b> This app does not log or save your inputs.  
+            Do not upload personal, sensitive, or confidential documents.  
+            Responses are AI-generated and for educational purposes only.  
+            <br><br>
+            📄 <a href="data:application/pdf;base64,{b64_pdf}" 
+            target="_blank" style="text-decoration:none; color:#0066cc; font-weight:bold;">
+            View Sources PDF
+            </a>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.warning("⚠️ Disclaimer: No sources PDF found. Please ensure ideology_chatbot_sources.pdf is in the project folder.")
 
 # ---------------------------
 # File Upload
@@ -74,7 +100,6 @@ if st.button("🔍 Cook Up Perspectives"):
     elif not selected_perspectives:
         st.warning("Please choose at least one perspective.")
     else:
-        # Lock screen overlay
         overlay = st.empty()
         overlay.markdown(
             """
@@ -114,7 +139,6 @@ if st.button("🔍 Cook Up Perspectives"):
             unsafe_allow_html=True
         )
 
-        # Generate summary
         try:
             summary_prompt = (
                 f"Compare these perspectives on the question '{user_question}':\n\n"
@@ -132,12 +156,8 @@ if st.button("🔍 Cook Up Perspectives"):
         except Exception as e:
             summary_text = f"Error generating summary: {str(e)}"
 
-        # Clear overlay
         overlay.empty()
 
-        # ---------------------------
-        # Results
-        # ---------------------------
         st.subheader("🍽️ Perspectives")
         for p, r in responses.items():
             st.markdown(f"**{p}:** {r}")
@@ -149,5 +169,3 @@ if st.button("🔍 Cook Up Perspectives"):
 # Idiotic Idiom Generator
 # ---------------------------
 idiotic_idiom.render_idiom_badge(st)
-
-
