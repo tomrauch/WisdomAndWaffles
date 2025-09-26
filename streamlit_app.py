@@ -22,14 +22,6 @@ st.markdown(
         background-color: #fdf3e7;
         background-image: url('https://www.transparenttextures.com/patterns/cream-pixels.png');
     }
-    h1 {
-        font-family: 'Georgia', serif;
-        font-size: 3em;
-        color: #8B0000;
-        text-align: center;
-        border-bottom: 3px double #8B0000;
-        padding-bottom: 0.2em;
-    }
     h2, h3 {
         font-family: 'Courier New', monospace;
         color: #5a2d0c;
@@ -66,10 +58,27 @@ st.markdown(
 )
 
 # ---------------------------
-# App Title & Disclaimer
+# Banner & Mission Statement
 # ---------------------------
-st.title("🧇 Wisdom & Waffles: The Ideology Diner")
+st.markdown(
+    """
+    <div style="text-align: center; margin-bottom: 20px;">
+        <img src="assets/waffle_banner.png" style="width: 100%; max-height: 250px; object-fit: cover; border-bottom: 4px double #8B0000;" alt="Wisdom & Waffles Banner">
+    </div>
+    <div style="text-align: center; font-family: Georgia, serif; font-size: 18px; color: #5a2d0c; margin: 15px 0 25px 0;">
+        Welcome to <b>Wisdom & Waffles</b> 🧇☕ <br><br>
+        A diner where ideas are served hot, and everyone has a seat at the table.  
+        Here, people from across the political and ideological spectrum come together  
+        to share perspectives, foster civil debate, and seek common ground  
+        for the benefit of all.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
+# ---------------------------
+# Disclaimer
+# ---------------------------
 st.info(
     "⚠️ Disclaimer: This app does not log or save your inputs. "
     "Do not upload personal, sensitive, or confidential documents. "
@@ -117,7 +126,6 @@ with st.form("ideology_form"):
 # Generate Responses
 # ---------------------------
 if submitted and user_question and perspectives_selected:
-    # Block screen with overlay
     with st.spinner("🍳 Cooking up your perspectives... please wait!"):
         progress_container = st.empty()
         progress_bar = st.progress(0)
@@ -134,7 +142,6 @@ if submitted and user_question and perspectives_selected:
             responses[p] = response.choices[0].message.content
             progress_bar.progress(int((i / len(perspectives_selected)) * 100))
 
-        # Summary step
         progress_container.markdown("🍽️ Generating summary of similarities and differences...")
         summary_prompt = f"Compare the following ideological responses. Summarize the key similarities and differences:\n\n{responses}"
         summary_response = client.chat.completions.create(
@@ -145,11 +152,9 @@ if submitted and user_question and perspectives_selected:
         summary_text = summary_response.choices[0].message.content
         progress_bar.progress(100)
 
-    # Clear overlay after work done
     progress_container.empty()
     progress_bar.empty()
 
-    # Show results
     st.subheader("🍽️ Responses from the Diner Booths")
     cols = st.columns(len(perspectives_selected))
     for idx, (p, ans) in enumerate(responses.items()):
@@ -165,3 +170,4 @@ if submitted and user_question and perspectives_selected:
 # ---------------------------
 st.markdown("---")
 idiotic_idiom.render_idiom_badge(st)
+
