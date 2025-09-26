@@ -14,14 +14,8 @@ client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 # ---------------------------
 # Banner + Diner Mission Text
 # ---------------------------
-st.markdown(
-    """
-    <div style="text-align:center; margin-bottom: 1rem;">
-        <img src=".streamlit/static/waffle_banner.png" width="500">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
+
+
 
 st.markdown(
     """
