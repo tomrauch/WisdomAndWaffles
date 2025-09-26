@@ -17,7 +17,7 @@ st.markdown(
     <div style='background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 1px solid #ffeeba;'>
         ⚠️ <b>Disclaimer:</b> This app is for educational and exploratory purposes only. 
         It simulates ideological perspectives using AI. 
-        Use responsibly to encourage understanding and civil debate.
+        
     </div>
     """,
     unsafe_allow_html=True
