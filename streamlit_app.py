@@ -1,171 +1,128 @@
 import os
-import base64
+import json
 import streamlit as st
 from openai import OpenAI
-from PyPDF2 import PdfReader
-import idiotic_idiom
+import PyPDF2
 
 # ---------------------------
-# Setup
+# OpenAI Client
 # ---------------------------
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-st.set_page_config(page_title="Wisdom & Waffles", layout="centered")
 
 # ---------------------------
-# Banner / Intro
+# Disclaimer Banner
 # ---------------------------
 st.markdown(
     """
-    <div style="text-align:center; padding:15px;">
-        <h1 style="color:#5a381e; font-family:Georgia, serif;">☕ Wisdom & Waffles 🧇</h1>
-        <p style="font-size:18px; color:#5a381e; font-family:Georgia, serif;">
-            A diner-themed space where different perspectives meet.  
-            Explore history, economics, and policy together — share ideas, find common ground, and spark civil debate.  
-        </p>
+    <div style='background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 1px solid #ffeeba;'>
+        ⚠️ <b>Disclaimer:</b> This app is for educational and exploratory purposes only. 
+        It simulates ideological perspectives using AI and does not represent factual truth or endorsement.  
+        Use responsibly to encourage understanding and civil debate.
     </div>
     """,
     unsafe_allow_html=True
 )
 
-# ---------------------------
-# Disclaimer with PDF Button
-# ---------------------------
 pdf_path = "assets/ideology_chatbot_sources.pdf"
+
 if os.path.exists(pdf_path):
     with open(pdf_path, "rb") as pdf_file:
-        pdf_bytes = pdf_file.read()
-    b64_pdf = base64.b64encode(pdf_bytes).decode("utf-8")
-
-    st.markdown(
-        f"""
-        <div style="background-color:#f9f9f9; padding:15px; border-radius:8px; 
-                    border-left: 5px solid #FFCC00; margin-bottom: 1.5rem;">
-            ⚠️ <b>Disclaimer:</b> This app does not log or save your inputs.  
-            Do not upload personal, sensitive, or confidential documents.  
-            Responses are AI-generated and for educational purposes only.  
-            <br><br>
-            📄 <a href="data:application/pdf;base64,{b64_pdf}" 
-            target="_blank" style="text-decoration:none; color:#0066cc; font-weight:bold;">
-            View Sources PDF
-            </a>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
+        st.download_button(
+            label="📄 View Sources PDF",
+            data=pdf_file,
+            file_name="ideology_chatbot_sources.pdf",
+            mime="application/pdf",
+        )
 else:
-    st.warning("⚠️ Disclaimer: No sources PDF found. Please ensure ideology_chatbot_sources.pdf is in the project folder.")
+    st.warning("⚠️ Sources PDF not found. Please ensure assets/ideology_chatbot_sources.pdf exists.")
 
 # ---------------------------
-# File Upload
+# Load perspectives
+# ---------------------------
+with open("data/perspectives.json", "r") as f:
+    perspectives = json.load(f)
+
+# ---------------------------
+# File Upload Section
 # ---------------------------
 st.subheader("📂 Upload a File for Analysis (Optional)")
-uploaded_file = st.file_uploader("Upload PDF", type=["pdf"])
+uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])
 
-pdf_text = ""
+uploaded_text = ""
 if uploaded_file is not None:
-    reader = PdfReader(uploaded_file)
-    for page in reader.pages:
-        pdf_text += page.extract_text()
+    try:
+        reader = PyPDF2.PdfReader(uploaded_file)
+        for page in reader.pages:
+            uploaded_text += page.extract_text() or ""
+        st.success("✅ File uploaded and processed successfully.")
+    except Exception as e:
+        st.error(f"Failed to process PDF: {e}")
 
 # ---------------------------
 # Question Input
 # ---------------------------
 st.subheader("❓ Ask a Question")
-user_question = st.text_area(
-    "Type your question about history, economics, or the workforce:",
-    placeholder="Example: What are the benefits of tariffs for the US economy?"
-)
+user_question = st.text_area("Type your question here:")
 
 # ---------------------------
-# Perspective Selector
+# Perspective Selection
 # ---------------------------
-st.subheader("👓 Choose Perspectives")
-perspectives = [
-    "Conservative", "Liberal", "Libertarian", "Progressive",
-    "Neoclassical", "Keynesian", "Marxist", "Green/New Deal", "Populist"
-]
-
+st.subheader("👓 Choose Perspectives (up to 3)")
 selected_perspectives = st.multiselect(
-    "Choose up to 3 perspectives",
-    perspectives,
-    max_selections=3
+    "Select perspectives:",
+    options=list(perspectives.keys()),
+    default=[],
+    max_selections=3,
 )
 
 # ---------------------------
 # Submit Button
 # ---------------------------
-if st.button("🔍 Cook Up Perspectives"):
-    if not user_question:
-        st.warning("Please enter a question.")
-    elif not selected_perspectives:
-        st.warning("Please choose at least one perspective.")
-    else:
-        overlay = st.empty()
-        overlay.markdown(
-            """
-            <div style="position:fixed; top:0; left:0; width:100%; height:100%;
-                        background-color:rgba(255,255,255,0.85); z-index:1000;
-                        display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <h2 style="color:#5a381e; font-family:Georgia, serif;">🍳 Cooking up perspectives...</h2>
-                <progress max="100" value="40" style="width:60%; height:25px;"></progress>
-            </div>
-            """,
-            unsafe_allow_html=True
-        )
-
+if st.button("🚀 Submit") and user_question and selected_perspectives:
+    # Progress overlay
+    with st.spinner("Generating perspectives..."):
         responses = {}
         for p in selected_perspectives:
-            try:
-                response = client.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[
-                        {"role": "system", "content": f"You are simulating a {p} perspective."},
-                        {"role": "user", "content": user_question + ("\n\nContext:\n" + pdf_text if pdf_text else "")}
-                    ],
-                )
-                responses[p] = response.choices[0].message.content.strip()
-            except Exception as e:
-                responses[p] = f"Error fetching {p} perspective: {str(e)}"
+            prompt = f"You are a chatbot with the following perspective:\n{perspectives[p]}\n\n"
+            if uploaded_text:
+                prompt += f"Here is context from an uploaded document:\n{uploaded_text[:2000]}\n\n"
+            prompt += f"Answer this question:\n{user_question}"
 
-        overlay.markdown(
-            """
-            <div style="position:fixed; top:0; left:0; width:100%; height:100%;
-                        background-color:rgba(255,255,255,0.85); z-index:1000;
-                        display:flex; flex-direction:column; align-items:center; justify-content:center;">
-                <h2 style="color:#5a381e; font-family:Georgia, serif;">📝 Cooking up summary...</h2>
-                <progress max="100" value="80" style="width:60%; height:25px;"></progress>
-            </div>
-            """,
-            unsafe_allow_html=True
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[{"role": "system", "content": prompt}],
+                temperature=0.7,
+            )
+            responses[p] = response.choices[0].message.content
+
+    # Display results side by side
+    cols = st.columns(len(responses))
+    for idx, (p, r) in enumerate(responses.items()):
+        with cols[idx]:
+            st.markdown(f"### {p}")
+            st.write(r)
+
+    # Generate summary of similarities/differences
+    with st.spinner("Summarizing similarities and differences..."):
+        summary_prompt = (
+            "Compare and summarize the key similarities and differences "
+            "across the following perspectives:\n\n"
+            + "\n".join([f"{p}: {r}" for p, r in responses.items()])
         )
+        summary_response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "system", "content": summary_prompt}],
+            temperature=0.7,
+        )
+        summary_text = summary_response.choices[0].message.content
 
-        try:
-            summary_prompt = (
-                f"Compare these perspectives on the question '{user_question}':\n\n"
-                + "\n\n".join([f"{p}: {r}" for p, r in responses.items()])
-                + "\n\nProvide a brief summary of the major similarities and differences."
-            )
-            summary_resp = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[
-                    {"role": "system", "content": "You are a neutral summarizer of ideological perspectives."},
-                    {"role": "user", "content": summary_prompt}
-                ],
-            )
-            summary_text = summary_resp.choices[0].message.content.strip()
-        except Exception as e:
-            summary_text = f"Error generating summary: {str(e)}"
-
-        overlay.empty()
-
-        st.subheader("🍽️ Perspectives")
-        for p, r in responses.items():
-            st.markdown(f"**{p}:** {r}")
-
-        st.subheader("🔎 Summary of Similarities and Differences")
-        st.info(summary_text)
+    # Display summary in its own card
+    st.markdown("---")
+    st.subheader("🔍 Summary of Similarities and Differences")
+    st.info(summary_text)
 
 # ---------------------------
-# Idiotic Idiom Generator
+# Idiotic Idiom Badge (external file)
 # ---------------------------
+import idiotic_idiom
 idiotic_idiom.render_idiom_badge(st)
