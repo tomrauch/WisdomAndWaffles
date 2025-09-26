@@ -147,23 +147,24 @@ if submit and user_question and selected_perspectives:
                 st.write(responses[perspective])
 
         # Generate summary if more than one perspective chosen
-        if len(selected_perspectives) > 1:
-            summary_prompt = (
-                f"Compare and summarize the major similarities and differences between these perspectives: "
-                f"{', '.join(selected_perspectives)}.\n\n"
-                f"Here are their responses to the question '{user_question}':\n"
-                + "\n".join([f\"{p}: {r}\" for p, r in responses.items()])
-            )
-            summary_completion = client.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "system", "content": summary_prompt}],
-                temperature=0.7
-            )
-            summary = summary_completion.choices[0].message.content
+if len(selected_perspectives) > 1:
+    summary_prompt = (
+        f"Compare and summarize the major similarities and differences between these perspectives: "
+        f"{', '.join(selected_perspectives)}.\n\n"
+        f"Here are their responses to the question '{user_question}':\n"
+        + "\n".join([f"{p}: {r}" for p, r in responses.items()])
+    )
+    summary_completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "system", "content": summary_prompt}],
+        temperature=0.7
+    )
+    summary = summary_completion.choices[0].message.content
 
-            with st.container():
-                st.markdown("## 👨‍🍳 Chef’s Special: Perspectives Compared")
-                st.info(summary)
+    with st.container():
+        st.markdown("## 👨‍🍳 Chef’s Special: Perspectives Compared")
+        st.info(summary)
+
 
 # ---------------------------
 # Idiotic Idiom (Fortune Cookie)
