@@ -1,21 +1,23 @@
 import os
 import random
+import json
 import streamlit as st
 from openai import OpenAI
 from PyPDF2 import PdfReader
 import idiotic_idiom
 
+# ---------------------------
 # Initialize OpenAI client
+# ---------------------------
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # ---------------------------
 # Banner + Diner Mission Text
 # ---------------------------
-
 st.markdown(
     """
     <div style="text-align:center; margin-bottom: 1rem;">
-        <img src="assets/waffle_banner.png" width="500">
+        <img src=".streamlit/static/waffle_banner.png" width="500">
     </div>
     """,
     unsafe_allow_html=True
@@ -36,7 +38,7 @@ st.markdown(
 )
 
 # ---------------------------
-# Custom CSS for diner look
+# Custom CSS for diner-style cards
 # ---------------------------
 st.markdown(
     """
@@ -55,7 +57,33 @@ st.markdown(
 )
 
 # ---------------------------
-# File Upload Card
+# Disclaimer
+# ---------------------------
+st.markdown(
+    """
+    <div style="background-color:#f9f9f9; padding:10px; border-radius:8px; border-left: 5px solid #FFCC00; margin-bottom: 1.5rem;">
+        ⚠️ <b>Disclaimer:</b> This app does not log or save your inputs.
+        Do not upload personal, sensitive, or confidential documents. 
+        Responses are AI-generated and for educational purposes only.
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+# ---------------------------
+# Load Perspectives
+# ---------------------------
+perspectives = {
+    "Populist": "Analyze from a populist viewpoint, focusing on common people vs. elites.",
+    "Neoclassical": "Analyze with emphasis on markets, efficiency, and rational choice.",
+    "Progressive": "Analyze with focus on reform, equity, and social welfare.",
+    "Libertarian": "Analyze from an individual freedom and limited government view.",
+    "Keynesian": "Analyze with focus on government intervention and demand management.",
+    "Green/New Deal": "Analyze with emphasis on climate, sustainability, and systemic reform."
+}
+
+# ---------------------------
+# File Upload
 # ---------------------------
 with st.container():
     st.markdown("## 📂 Upload a File for Analysis (Optional)")
@@ -69,7 +97,7 @@ with st.container():
         st.write(pdf_text[:1000] + ("..." if len(pdf_text) > 1000 else ""))
 
 # ---------------------------
-# Ask a Question Card
+# Ask a Question
 # ---------------------------
 with st.container():
     st.markdown("## ❓ Ask a Question")
@@ -80,68 +108,66 @@ with st.container():
     )
 
 # ---------------------------
-# Choose Perspectives Card
+# Choose Perspectives
 # ---------------------------
 with st.container():
     st.markdown("## 👓 Choose Perspectives")
-    perspectives = {
-        "Populist": "Analyze from a populist viewpoint, focusing on common people vs. elites.",
-        "Neoclassical": "Analyze with emphasis on markets, efficiency, and rational choice.",
-        "Progressive": "Analyze with focus on reform, equity, and social welfare.",
-        "Libertarian": "Analyze from an individual freedom and limited government view.",
-        "Keynesian": "Analyze with focus on government intervention and demand management.",
-        "Green/New Deal": "Analyze with emphasis on climate, sustainability, and systemic reform."
-    }
-
     selected_perspectives = st.multiselect(
         "Choose up to 3 perspectives",
         options=list(perspectives.keys()),
         max_selections=3
     )
-
-    submit = st.button("Submit")
+    submit = st.button("🍳 Place Your Order")
 
 # ---------------------------
-# Process User Input
+# Generate Responses
 # ---------------------------
 if submit and user_question and selected_perspectives:
-    with st.spinner("🍳 Cooking up perspectives..."):
+    with st.spinner("🍳 Cooking up perspectives... please wait!"):
         responses = {}
         for perspective in selected_perspectives:
-            prompt = f"You are a chatbot with the following perspective: {perspectives[perspective]}\n\nQuestion: {user_question}"
+            prompt = (
+                f"You are a chatbot with the following perspective: {perspectives[perspective]}.\n\n"
+                f"Question: {user_question}\n\n"
+                f"Additional context from PDF (if any): {pdf_text}"
+            )
             completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4o-mini",
                 messages=[{"role": "system", "content": prompt}],
                 temperature=0.7
             )
             responses[perspective] = completion.choices[0].message.content
 
-        # Display results side-by-side
+        # Show responses side-by-side
+        st.markdown("## 🍽️ Responses from the Diner Booths")
         cols = st.columns(len(selected_perspectives))
         for col, perspective in zip(cols, selected_perspectives):
             with col:
                 st.markdown(f"### {perspective}")
                 st.write(responses[perspective])
 
-        # Generate summary of similarities and differences
+        # Generate summary if more than one perspective chosen
         if len(selected_perspectives) > 1:
             summary_prompt = (
-                f"Compare and summarize the major similarities and differences between these perspectives: {', '.join(selected_perspectives)}.\n"
+                f"Compare and summarize the major similarities and differences between these perspectives: "
+                f"{', '.join(selected_perspectives)}.\n\n"
                 f"Here are their responses to the question '{user_question}':\n"
-                + "\n".join([f"{p}: {r}" for p, r in responses.items()])
+                + "\n".join([f\"{p}: {r}\" for p, r in responses.items()])
             )
             summary_completion = client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4o-mini",
                 messages=[{"role": "system", "content": summary_prompt}],
                 temperature=0.7
             )
             summary = summary_completion.choices[0].message.content
 
             with st.container():
-                st.markdown("## 🔎 Summary of Similarities and Differences")
-                st.write(summary)
+                st.markdown("## 👨‍🍳 Chef’s Special: Perspectives Compared")
+                st.info(summary)
 
 # ---------------------------
-# Idiotic Idiom Badge
+# Idiotic Idiom (Fortune Cookie)
 # ---------------------------
+st.markdown("---")
 idiotic_idiom.render_idiom_badge(st)
+
