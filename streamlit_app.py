@@ -36,6 +36,23 @@ if os.path.exists(pdf_path):
 else:
     st.warning("⚠️ Sources PDF not found. Please ensure assets/ideology_chatbot_sources.pdf exists.")
 
+    # ---------------------------
+# App Header (Mission / Theme)
+# ---------------------------
+st.markdown(
+    """
+    <div style='text-align: center; padding: 20px;'>
+        <h1 style='margin-bottom: 0;'>🥞 Wisdom & Waffles ☕</h1>
+        <p style='font-size: 18px; color: #555;'>
+            A diner for ideas — where perspectives from across the spectrum 
+            come together to spark understanding, civil debate, and common ground.
+        </p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+
 # ---------------------------
 # Load perspectives
 # ---------------------------
