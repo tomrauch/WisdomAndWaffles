@@ -30,7 +30,7 @@ st.markdown(
 # ---------------------------
 # Disclaimer with PDF Button
 # ---------------------------
-pdf_path = "ideology_chatbot_sources.pdf"
+pdf_path = "assets/ideology_chatbot_sources.pdf"
 if os.path.exists(pdf_path):
     with open(pdf_path, "rb") as pdf_file:
         pdf_bytes = pdf_file.read()
