@@ -3,6 +3,9 @@ import json
 import streamlit as st
 from openai import OpenAI
 import PyPDF2
+from PIL import Image
+import pytesseract
+import idiotic_idiom
 
 # ---------------------------
 # OpenAI Client
@@ -16,8 +19,8 @@ st.markdown(
     """
     <div style='background-color: #fff3cd; padding: 15px; border-radius: 10px; border: 1px solid #ffeeba;'>
         ⚠️ <b>Disclaimer:</b> This app is for educational and exploratory purposes only. 
-        It simulates ideological perspectives using AI. 
-        
+        It simulates ideological perspectives using AI and does not represent factual truth or endorsement.  
+        Use responsibly to encourage understanding and civil debate.
     </div>
     """,
     unsafe_allow_html=True
@@ -36,7 +39,7 @@ if os.path.exists(pdf_path):
 else:
     st.warning("⚠️ Sources PDF not found. Please ensure assets/ideology_chatbot_sources.pdf exists.")
 
-    # ---------------------------
+# ---------------------------
 # App Header (Mission / Theme)
 # ---------------------------
 st.markdown(
@@ -44,14 +47,13 @@ st.markdown(
     <div style='text-align: center; padding: 20px;'>
         <h1 style='margin-bottom: 0;'>🥞 Wisdom & Waffles ☕</h1>
         <p style='font-size: 18px; color: #555;'>
-            A diner for ideas — where perspectives from across the political spectrum 
-            come together to spark understanding, engage in civil debate, and find common ground.
+            A diner for ideas — where perspectives from across the spectrum 
+            come together to spark understanding, civil debate, and common ground.
         </p>
     </div>
     """,
     unsafe_allow_html=True
 )
-
 
 # ---------------------------
 # Load perspectives
@@ -63,17 +65,28 @@ with open("data/perspectives.json", "r") as f:
 # File Upload Section
 # ---------------------------
 st.subheader("📂 Upload a File for Analysis (Optional)")
-uploaded_file = st.file_uploader("Upload a PDF", type=["pdf"])
+uploaded_file = st.file_uploader("Upload a file", type=["pdf", "txt", "jpg", "jpeg", "png"])
 
 uploaded_text = ""
 if uploaded_file is not None:
     try:
-        reader = PyPDF2.PdfReader(uploaded_file)
-        for page in reader.pages:
-            uploaded_text += page.extract_text() or ""
-        st.success("✅ File uploaded and processed successfully.")
+        if uploaded_file.type == "application/pdf":
+            reader = PyPDF2.PdfReader(uploaded_file)
+            for page in reader.pages:
+                uploaded_text += page.extract_text() or ""
+            st.success("✅ PDF uploaded and processed successfully.")
+
+        elif uploaded_file.type == "text/plain":
+            uploaded_text = uploaded_file.read().decode("utf-8")
+            st.success("✅ TXT file uploaded and processed successfully.")
+
+        elif uploaded_file.type in ["image/jpeg", "image/png"]:
+            image = Image.open(uploaded_file)
+            uploaded_text = pytesseract.image_to_string(image)
+            st.success("✅ Image uploaded and text extracted successfully.")
+
     except Exception as e:
-        st.error(f"Failed to process PDF: {e}")
+        st.error(f"Failed to process file: {e}")
 
 # ---------------------------
 # Question Input
@@ -111,7 +124,7 @@ if st.button("🚀 Submit") and user_question and selected_perspectives:
             )
             responses[p] = response.choices[0].message.content
 
-        # Save responses in session state
+        # Save in session state
         st.session_state.responses = responses
 
         # Generate summary and save
@@ -143,7 +156,7 @@ if "summary" in st.session_state:
     st.info(st.session_state.summary)
 
 # ---------------------------
-# Idiotic Idiom Badge (external file)
+# Idiotic Idiom Badge
 # ---------------------------
-import idiotic_idiom
 idiotic_idiom.render_idiom_badge(st)
+
