@@ -49,6 +49,32 @@
       "Mother Jones"
     ]
   },
+
+  "Neoclassical": {
+  "tenets": "Focuses on rational decision-making by individuals seeking to maximize utility and firms seeking to maximize profit. Markets are viewed as efficient mechanisms for allocating resources through the price system, with equilibrium reached when supply equals demand.",
+  "history": "Emerging in the late 19th century through the works of William Stanley Jevons, Léon Walras, and Alfred Marshall, neoclassical economics refined classical thought by introducing marginal analysis and mathematical modeling. It became the dominant paradigm in the 20th century and remains central to mainstream economics.",
+  "popularity": "Highly influential in economic policy, academia, and institutions such as central banks, the IMF, and World Bank. Its emphasis on efficiency and rationality remains a cornerstone of most modern economic models.",
+  "current_figures": "Modern advocates include economists such as Robert Lucas and Gregory Mankiw. Institutions like the University of Chicago and Harvard have long been centers of neoclassical thought.",
+  "philosophers": [
+    {
+      "name": "Alfred Marshall",
+      "works": "Principles of Economics (1890)",
+      "notes": "Unified classical and marginalist ideas into a coherent microeconomic framework."
+    },
+    {
+      "name": "Léon Walras",
+      "works": "Elements of Pure Economics (1874)",
+      "notes": "Developed general equilibrium theory — the foundation for modern market modeling."
+    }
+  ],
+  "media_outlets": [
+    "The Economist",
+    "Financial Times",
+    "Wall Street Journal (Markets & Economics)",
+    "Bloomberg Economics",
+    "Harvard Business Review"
+  ]
+},
   "Libertarian": {
     "tenets": "Maximum individual liberty, minimal government, free markets, strong property rights, skepticism of coercion or paternalism.",
     "history": "Derives from classical liberalism, with resurgence in 20th century via Austrian economics, public choice, civil-liberties movements.",
@@ -98,4 +124,29 @@
       "Vox Economics sections"
     ]
   }
+},
+"Green/New Deal": {
+  "tenets": "Advocates rapid transition to renewable energy, large-scale public investment in green infrastructure, and social equity initiatives to ensure climate action benefits workers and marginalized communities. Emphasizes sustainability, decarbonization, and just economic transformation.",
+  "history": "Rooted in environmental and labor movements of the late 20th century, gaining renewed traction after 2018 when U.S. legislators introduced the Green New Deal framework. Inspired by Franklin D. Roosevelt’s original New Deal but centered on climate change and economic justice.",
+  "popularity": "Increasingly popular among younger voters and progressive policymakers. Adopted in various forms by the EU Green Deal, Canada’s Just Transition framework, and local U.S. initiatives.",
+  "current_figures": "Alexandria Ocasio-Cortez, Ed Markey, Greta Thunberg, and Naomi Klein are prominent public advocates; numerous climate economists and environmental NGOs promote its ideas globally.",
+  "philosophers": [
+    {
+      "name": "Naomi Klein",
+      "works": "This Changes Everything (2014)",
+      "notes": "Links climate crisis with capitalism and systemic inequality."
+    },
+    {
+      "name": "Kate Raworth",
+      "works": "Doughnut Economics (2017)",
+      "notes": "Proposes an ecological and social boundary model for sustainable development."
+    }
+  ],
+  "media_outlets": [
+    "Grist",
+    "Inside Climate News",
+    "The Guardian (Environment Section)",
+    "Democracy Now!",
+    "Bloomberg Green"
+  ]
 }
