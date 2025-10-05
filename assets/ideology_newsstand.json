@@ -1,0 +1,101 @@
+{
+  "Conservative": {
+    "tenets": "Emphasizes tradition, social stability, limited government in markets, strong national defense, respect for institutions and norms.",
+    "history": "Roots in reaction to radical change in 18th–19th century Europe. In U.S., grew via 20th-century classical liberal economic ideas mixed with social conservatism.",
+    "popularity": "Strong in U.S. Republican base; conservative parties and media have influence globally, though levels vary.",
+    "current_figures": "Examples: Ronald Reagan (historical), Margaret Thatcher (UK), more recently prominent voices in GOP and conservative media.",
+    "philosophers": [
+      {
+        "name": "Edmund Burke",
+        "works": "Reflections on the Revolution in France (1790)",
+        "notes": "Prudence, respect for tradition, caution toward radical change"
+      },
+      {
+        "name": "Michael Oakeshott",
+        "works": "Rationalism in Politics (1962)",
+        "notes": "Skepticism of grand design and rationalist planning"
+      }
+    ],
+    "media_outlets": [
+      "Fox News",
+      "The Daily Caller",
+      "One America News Network (OANN)",
+      "The Washington Free Beacon",
+      "National Review"
+    ]
+  },
+  "Progressive": {
+    "tenets": "Advocates equity, strong regulatory state, social justice, public goods, expansion of civil rights, active government role.",
+    "history": "U.S. Progressive Era (1890s–1920s), later civil rights era, modern progressive movements, left reform traditions globally.",
+    "popularity": "Core of progressive wings within left-of-center parties (e.g. Democrats in U.S.); parallels in social-democratic/green parties globally.",
+    "current_figures": "Examples: Franklin D. Roosevelt, Lyndon Johnson (historical); modern progressive U.S. politicians, movements around climate policy, social welfare.",
+    "philosophers": [
+      {
+        "name": "John Dewey",
+        "works": "Democracy and Education (1916)",
+        "notes": "Pragmatic democracy, education as social tool"
+      },
+      {
+        "name": "Amartya Sen",
+        "works": "Development as Freedom (1999)",
+        "notes": "Capabilities approach, justice, development"
+      }
+    ],
+    "media_outlets": [
+      "NPR",
+      "The Atlantic",
+      "Vox",
+      "HuffPost",
+      "Mother Jones"
+    ]
+  },
+  "Libertarian": {
+    "tenets": "Maximum individual liberty, minimal government, free markets, strong property rights, skepticism of coercion or paternalism.",
+    "history": "Derives from classical liberalism, with resurgence in 20th century via Austrian economics, public choice, civil-liberties movements.",
+    "popularity": "Smaller but notable niche in U.S. (Libertarian Party, think tanks), present in policy debates and international free-market networks.",
+    "current_figures": "Examples: Friedrich Hayek, Milton Friedman (historical); current voices in think tanks, digital media, academia.",
+    "philosophers": [
+      {
+        "name": "F. A. Hayek",
+        "works": "The Road to Serfdom (1944)",
+        "notes": "Knowledge problems, spontaneous order"
+      },
+      {
+        "name": "Robert Nozick",
+        "works": "Anarchy, State, and Utopia (1974)",
+        "notes": "Minimal state, rights-based constraints"
+      }
+    ],
+    "media_outlets": [
+      "Reason Magazine",
+      "Cato Institute Media",
+      "Mises Institute",
+      "Liberty.me",
+      "Laissez-Faire Book Clubs / associated podcasts"
+    ]
+  },
+  "Keynesian": {
+    "tenets": "Active macroeconomic policy, counter-cyclical fiscal and monetary intervention, pursuit of full employment and stability.",
+    "history": "Originates with John Maynard Keynes in 1930s; dominant mid-20th century; evolved to New Keynesian frameworks.",
+    "popularity": "Influential in governmental economics, central banks, especially in volatile periods; mainstream in many countries’ economic policy toolkits.",
+    "current_figures": "John Maynard Keynes (historical); modern economists in central banking, academia, ministerial advisors.",
+    "philosophers": [
+      {
+        "name": "John Maynard Keynes",
+        "works": "The General Theory of Employment, Interest and Money (1936)",
+        "notes": "Effective demand, liquidity preference, fiscal policy"
+      },
+      {
+        "name": "James Tobin",
+        "works": "Essays in Economics",
+        "notes": "Portfolio selection, stabilization, bridging Keynesian and financial markets"
+      }
+    ],
+    "media_outlets": [
+      "The Economist",
+      "Financial Times",
+      "Bloomberg Opinion",
+      "Vox Economics sections"
+    ]
+  }
+}
