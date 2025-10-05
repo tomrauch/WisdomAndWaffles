@@ -123,8 +123,7 @@
       "Bloomberg Opinion",
       "Vox Economics sections"
     ]
-  }
-},
+  },
 "Green/New Deal": {
   "tenets": "Advocates rapid transition to renewable energy, large-scale public investment in green infrastructure, and social equity initiatives to ensure climate action benefits workers and marginalized communities. Emphasizes sustainability, decarbonization, and just economic transformation.",
   "history": "Rooted in environmental and labor movements of the late 20th century, gaining renewed traction after 2018 when U.S. legislators introduced the Green New Deal framework. Inspired by Franklin D. Roosevelt’s original New Deal but centered on climate change and economic justice.",
@@ -149,4 +148,5 @@
     "Democracy Now!",
     "Bloomberg Green"
   ]
+}
 }
