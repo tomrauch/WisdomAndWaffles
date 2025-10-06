@@ -36,7 +36,7 @@ with tab_chatbot:
         <div style='text-align: center; padding: 20px;'>
             <h1 style='margin-bottom: 0;'>🥞 Wisdom & Waffles ☕</h1>
             <p style='font-size: 18px; color: #555;'>
-                A diner for ideas — where perspectives from across the spectrum come together to spark understanding, encourage civil debate, and common ground.
+                A diner for ideas — where perspectives from across the spectrum come together to spark understanding, encourage civil debate, and find common ground.
             </p>
         </div>
         """,
