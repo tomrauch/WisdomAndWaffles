@@ -1,4 +1,31 @@
 {
+
+  "Populist": {
+  "tenets": "Centers on the belief that ordinary people are exploited by corrupt elites and must reclaim political power. Populism can take left-wing, right-wing, or centrist forms but consistently appeals to 'the people' versus 'the establishment.' It favors direct democracy, protectionism, and skepticism toward traditional institutions.",
+  "history": "Originating with 19th-century farmers’ movements in the U.S. and similar anti-elite uprisings worldwide, populism resurged in the late 20th and early 21st centuries through figures like Hugo Chávez, Donald Trump, Marine Le Pen, and Nigel Farage. It adapts to national contexts, often blending nationalism with anti-globalization sentiment.",
+  "popularity": "Populist movements have gained global traction, particularly during economic downturns or crises of trust in government and media. They are strong in both Western democracies and emerging economies.",
+  "current_figures": "Donald Trump (U.S.), Viktor Orbán (Hungary), Giorgia Meloni (Italy), Andrés Manuel López Obrador (Mexico), Marine Le Pen (France).",
+  "philosophers": [
+    {
+      "name": "Ernesto Laclau",
+      "works": "On Populist Reason (2005)",
+      "notes": "Argued that populism is a political logic centered on constructing 'the people' as a unifying social force."
+    },
+    {
+      "name": "Chantal Mouffe",
+      "works": "For a Left Populism (2018)",
+      "notes": "Advocated for a democratic, pluralist form of populism as a counterweight to neoliberalism."
+    }
+  ],
+  "media_outlets": [
+    "Fox News (U.S.)",
+    "Newsmax",
+    "Breitbart",
+    "The Daily Wire",
+    "GB News (U.K.)",
+    "The Epoch Times"
+  ]
+},
   "Conservative": {
     "tenets": "Emphasizes tradition, social stability, limited government in markets, strong national defense, respect for institutions and norms.",
     "history": "Roots in reaction to radical change in 18th–19th century Europe. In U.S., grew via 20th-century classical liberal economic ideas mixed with social conservatism.",
